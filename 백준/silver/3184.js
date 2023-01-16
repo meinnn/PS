@@ -39,7 +39,7 @@ const BFS = (a, b) => {
         for (let i = 0; i < 4; i++) {
             const [nx, ny] = [x + dx[i], y + dy[i]];
 
-            if (0 <= nx < R && 0 <= ny < C) {
+            if (0 <= nx && nx < R && 0 <= ny && ny < C) {
                 if (yard[nx][ny] != '#' && !visited[nx][ny]) {
                     queue.push([nx, ny]);
                     visited[nx][ny] = 1;
