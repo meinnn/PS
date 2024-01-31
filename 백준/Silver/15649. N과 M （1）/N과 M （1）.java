@@ -8,6 +8,7 @@ public class Main {
 	static boolean[] isSelected;
 	
 	static int N, M;
+	static StringBuilder sb = new StringBuilder();
 	
 	public static void main(String[] args) throws Exception {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -18,16 +19,15 @@ public class Main {
 		numbers = new int[M];
 		isSelected = new boolean[N+1];
 		perm(0);
-		
+		System.out.println(sb.toString());
 	}
 	
 	static void perm(int cnt) {
 		if (cnt == M) {
-			StringBuilder sb = new StringBuilder();
 			for (int n : numbers) {
 				sb.append(n).append(" ");
 			}
-			System.out.println(sb);
+			sb.append("\n");
 			return;
 		}
 		
