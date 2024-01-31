@@ -1,4 +1,3 @@
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.StringTokenizer;
@@ -24,10 +23,11 @@ public class Main {
 	
 	static void perm(int cnt) {
 		if (cnt == M) {
+			StringBuilder sb = new StringBuilder();
 			for (int n : numbers) {
-				System.out.print(n + " ");
+				sb.append(n).append(" ");
 			}
-			System.out.println();
+			System.out.println(sb);
 			return;
 		}
 		
