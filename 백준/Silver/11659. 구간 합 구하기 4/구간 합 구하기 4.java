@@ -1,4 +1,3 @@
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -17,13 +16,17 @@ public class Main {
         for (int i = 1; i <= N; i++) {  // 누적 합
             arr[i] += arr[i-1] + Integer.parseInt(st.nextToken());
         }
+        
+        StringBuilder sb = new StringBuilder();
 
         for (int k = 0; k < M; k++) {
             st = new StringTokenizer(br.readLine());
             int i = Integer.parseInt(st.nextToken());
             int j = Integer.parseInt(st.nextToken());
 
-            System.out.println(arr[j] - arr[i-1]);
+            sb.append(arr[j] - arr[i-1]).append("\n");
         }
+        
+        System.out.println(sb.toString());
     }
 }
