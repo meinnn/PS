@@ -26,9 +26,7 @@ public class Main {
 					bitter += food[j][1];
 				}
 			}
-			if (Math.abs(sour - bitter) < min) {
-				min = Math.abs(sour - bitter);
-			}
+			min = Math.min(min, Math.abs(sour - bitter));
 			sour = 1;
 			bitter = 0;
 		}
