@@ -8,13 +8,13 @@ public class Main {
 	
 	public static void main(String[] args) throws Exception {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		StringTokenizer st = new StringTokenizer(br.readLine());
+		StringTokenizer st = new StringTokenizer(br.readLine(), " ");
 		
 		int S = Integer.parseInt(st.nextToken());
 		int P = Integer.parseInt(st.nextToken());
 		
 		String str = br.readLine();
-		st = new StringTokenizer(br.readLine());
+		st = new StringTokenizer(br.readLine(), " ");
 		minAcgt = new int[4];
 		for (int i = 0; i < 4; i++) {
 			minAcgt[i] = Integer.parseInt(st.nextToken());
