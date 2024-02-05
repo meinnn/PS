@@ -1,6 +1,6 @@
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.LinkedList;
+import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.StringTokenizer;
 
@@ -12,7 +12,7 @@ public class Main {
 		int N = Integer.parseInt(st.nextToken());
 		int K = Integer.parseInt(st.nextToken());
 
-		Queue<Integer> q = new LinkedList<>();
+		Queue<Integer> q = new ArrayDeque<>();
 		for (int i = 1; i <= N; i++) {
 			q.add(i);
 		}
