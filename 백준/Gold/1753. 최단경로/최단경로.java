@@ -75,8 +75,10 @@ public class Main {
 			}
 		}
 
+		StringBuilder sb = new StringBuilder();
 		for (int i = 1; i < V + 1; i++) {
-			System.out.println(dist[i] == Integer.MAX_VALUE ? "INF" : dist[i]);
+			sb.append(dist[i] == Integer.MAX_VALUE ? "INF" : dist[i]).append("\n");
 		}
+		System.out.println(sb);
 	}
 }
