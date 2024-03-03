@@ -1,29 +1,25 @@
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.Arrays;
-import java.util.StringTokenizer;
+import java.util.*;
 
 public class Main {
 
-    static class Edge implements Comparable<Edge> {
-        int from, to, weight;
+    static class Node implements Comparable<Node> {
+        int idx, weight;
 
-        public Edge(int from, int to, int weight) {
-            this.from = from;
-            this.to = to;
+        public Node(int idx, int weight) {
+            this.idx = idx;
             this.weight = weight;
         }
 
-
         @Override
-        public int compareTo(Edge o) {
+        public int compareTo(Node o) {
             return Integer.compare(this.weight, o.weight);
         }
     }
 
     static int V, E;
-    static Edge[] edgeList;
-    static int[] parent;
+    static List<Node>[] graph;
 
     public static void main(String[] args) throws Exception {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -32,7 +28,9 @@ public class Main {
         V = Integer.parseInt(st.nextToken());
         E = Integer.parseInt(st.nextToken());
 
-        edgeList = new Edge[E];
+        graph = new ArrayList[V + 1];
+        for (int i = 1; i < V + 1; i++)
+            graph[i] = new ArrayList<>();
 
         for (int i = 0; i < E; i++) {
             st = new StringTokenizer(br.readLine());
@@ -40,51 +38,42 @@ public class Main {
             int B = Integer.parseInt(st.nextToken());
             int C = Integer.parseInt(st.nextToken());
 
-            edgeList[i] = new Edge(A, B, C);
+            graph[A].add(new Node(B, C));
+            graph[B].add(new Node(A, C));
         }
 
-        parent = new int[V + 1];
-        kruskal();
+        prim();
     }
 
-    private static void kruskal() {
-        Arrays.sort(edgeList);
+    private static void prim() {
+        boolean[] visited = new boolean[V + 1];
+        int[] dist = new int[V + 1];
+        Arrays.fill(dist, Integer.MAX_VALUE);
 
-        make();
+        PriorityQueue<Node> pq = new PriorityQueue<>();
+        dist[0] = 0;
+        pq.add(new Node(1, 0));
 
         int cost = 0, cnt = 0;
-        for (Edge edge : edgeList) {
-            if (!union(edge.from, edge.to))
+        while (!pq.isEmpty()) {
+            Node cur = pq.poll();
+
+            if (visited[cur.idx])
                 continue;
 
-            cost += edge.weight;
-            if (++cnt == V - 1)
+            cost += cur.weight;
+            visited[cur.idx] = true;
+            if (++cnt == V)
                 break;
+
+            for (Node node : graph[cur.idx]) {
+                if (!visited[node.idx] && dist[node.idx] > node.weight) {
+                    dist[node.idx] = node.weight;
+                    pq.add(new Node(node.idx, dist[node.idx]));
+                }
+            }
         }
 
         System.out.println(cost);
     }
-
-    private static void make() {
-        for (int i = 1; i < V + 1; i++)
-            parent[i] = i;
-    }
-
-    private static int find(int x) {
-        if (x == parent[x])
-            return x;
-
-        return parent[x] = find(parent[x]);
-    }
-
-    private static boolean union(int a, int b) {
-        int aRoot = find(a);
-        int bRoot = find(b);
-        if (aRoot == bRoot)
-            return false;
-
-        parent[bRoot] = aRoot;
-        return true;
-    }
-
 }
