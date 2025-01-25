@@ -2,13 +2,13 @@ const fs = require('fs');
 const input = fs.readFileSync(0, 'utf-8').trim().split('\n');
 
 const [N, M, D] = input[0].split(' ').map(Number);
-const board = Array(N);
-for (let i = 0; i < N; i++) {
-  board[i] = input[i + 1].split(' ').map(Number);
+const board = [];
+for (let i = 1; i <= N; i++) {
+  board.push(input[i].split(' ').map(Number));
 }
-board.push(Array(M).fill(2));
+board.push(Array(M).fill(2)); // 제일 아래 성
 
-let enemies = 0;
+let enemies = 0; // 초기 적 수
 for (let i = 0; i < N; i++) {
   for (let j = 0; j < M; j++) {
     if (board[i][j] === 1) {
@@ -17,15 +17,17 @@ for (let i = 0; i < N; i++) {
   }
 }
 
+let max = 0;
+
+// 방향 벡터
 const dx = [0, -1, 0]; // <-, 위, ->
 const dy = [-1, 0, 1];
 
-// 조합
-let max = 0; // 궁수의 공격으로 제거할 수 있는 적의 최대 수
+// 조합 탐색 (궁수 위치)
 for (let i = 0; i < M; i++) {
   for (let j = i + 1; j < M; j++) {
     for (let l = j + 1; l < M; l++) {
-      play([i, j, l]); // 궁수 위치
+      max = Math.max(max, play([i, j, l]));
     }
   }
 }
@@ -33,75 +35,83 @@ for (let i = 0; i < M; i++) {
 console.log(max);
 
 function play(positions) {
-  const copy = board.map((row) => [...row]);
-  let cnt = 0;
-  let left = enemies; // 남은 적 수
-  while (left > 0) {
-    // 공격
-    const attacked = attack(positions, copy);
-    cnt += attacked;
-    left -= attacked;
+  const copy = board.map((row) => [...row]); // 깊은 복사
+  let totalKills = 0;
+  let leftEnemies = enemies;
 
-    // 적 없으면 종료
-    if (left <= 0) break;
+  while (leftEnemies) {
+    // 적 제거 (공격)
+    const kills = attack(positions, copy);
+    totalKills += kills;
+    leftEnemies -= kills;
+
+    // 적이 없으면 종료
+    if (leftEnemies === 0) break;
 
     // 적 이동
-    for (let i = N - 1; i >= 0; i--) {
-      for (let j = 0; j < M; j++) {
-        if (copy[i][j] === 1) {
-          copy[i][j] = 0;
-          if (i === N - 1) {
-            left--;
-          } else {
-            copy[i + 1][j] = 1;
-          }
-        }
-      }
-    }
+    leftEnemies -= moveEnemies(copy);
   }
 
-  if (cnt > max) max = cnt; // max 갱신
+  return totalKills;
 }
 
-function attack(positions, board) {
-  // visited[x][y][궁수idx]
-  const visited = Array.from({ length: N + 1 }, () =>
-    Array.from({ length: M }, () => Array(3).fill(false))
-  );
-  const q = [];
+function attack(positions, copy) {
+  const targets = new Set();
 
-  for (let i = 0; i < 3; i++) {
-    visited[N][positions[i]][i] = true;
-    q.push([N, positions[i], i]); //  x, y, 궁수번호
-  }
+  for (const pos of positions) {
+    const queue = [[N, pos]];
+    const visited = Array.from({ length: N + 1 }, () => Array(M).fill(false));
+    visited[N][pos] = true;
 
-  const shoot = Array(3).fill(false);
-  const set = new Set();
-  while (q.length > 0) {
-    const [cx, cy, idx] = q.shift();
-    if (shoot[idx]) continue;
+    while (queue.length) {
+      const [cx, cy] = queue.shift();
 
-    for (let i = 0; i < 3; i++) {
-      const [nx, ny] = [cx + dx[i], cy + dy[i]];
-      if (nx < 0 || nx >= N + 1 || ny < 0 || ny >= M || visited[nx][ny][idx])
-        continue;
+      for (let i = 0; i < 3; i++) {
+        const nx = cx + dx[i];
+        const ny = cy + dy[i];
 
-      if (Math.abs(N - nx) + Math.abs(positions[idx] - ny) <= D) {
-        visited[nx][ny][idx] = true;
-        if (board[nx][ny] === 1) {
-          set.add(`${nx},${ny}`);
-          shoot[idx] = true;
+        if (nx < 0 || nx >= N + 1 || ny < 0 || ny >= M || visited[nx][ny])
+          continue;
+
+        visited[nx][ny] = true;
+        const dist = Math.abs(N - nx) + Math.abs(pos - ny);
+
+        if (dist > D) continue; // 사거리 초과
+        if (copy[nx][ny] === 1) {
+          targets.add(nx * M + ny); // 좌표를 인덱스로 변환하여 저장
+          queue.length = 0; // 첫 번째 적 발견 시 탐색 종료
           break;
         }
-        q.push([nx, ny, idx]);
+
+        queue.push([nx, ny]);
       }
     }
   }
 
-  for (const position of set) {
-    const [x, y] = position.split(',').map(Number);
-    board[x][y] = 0;
+  // 적 제거
+  for (const target of targets) {
+    const x = Math.floor(target / M);
+    const y = target % M;
+    copy[x][y] = 0;
   }
 
-  return set.size; // 제외된 적 수 반환
+  return targets.size; // 제외된 적 수 반환
+}
+
+function moveEnemies(copy) {
+  let cnt = 0;
+  for (let i = N - 1; i >= 0; i--) {
+    for (let j = 0; j < M; j++) {
+      if (copy[i][j] === 1) {
+        copy[i][j] = 0; // 현재 위치 초기화
+        if (i === N - 1) {
+          cnt++;
+        } else {
+          copy[i + 1][j] = 1; // 아래로 이동
+        }
+      }
+    }
+  }
+
+  return cnt; // 이동으로 제외된 적 수 반환
 }
