@@ -5,28 +5,27 @@ const n = Number(input[0]);
 const inorder = input[1].split(' ').map(Number);
 const postorder = input[2].split(' ').map(Number);
 
+// inorder 값의 인덱스를 저장한 Map
+const inorderMap = new Map();
+inorder.forEach((value, index) => inorderMap.set(value, index));
+
 const tree = [];
-tree.push(0); // 트리 인덱스 0
 
 function findPreorder(inStart, inEnd, postStart, postEnd) {
+  if (inStart > inEnd || postStart > postEnd) return;
+
   const root = postorder[postEnd];
-  tree.push(root);
+  tree.push(root); // 트리 저장
 
-  if (postStart === postEnd) return; // 트리에 루트 하나만 있으면 종료
+  const rootIndex = inorderMap.get(root);
+  const leftCount = rootIndex - inStart; // 왼쪽 서브트리 크기 계산
 
-  let left = 0;
-  for (let i = inStart; i <= inEnd; i++) {
-    if (inorder[i] === root) break;
-    left++;
-  }
+  // 왼쪽 서브트리
+  findPreorder(inStart, rootIndex - 1, postStart, postStart + leftCount - 1);
 
-  if (left > 0)
-    findPreorder(inStart, inStart + left - 1, postStart, postStart + left - 1);
-
-  const right = inEnd - inStart - left;
-  if (right > 0)
-    findPreorder(inStart + left + 1, inEnd, postStart + left, postEnd - 1);
+  // 오른쪽 서브트리
+  findPreorder(rootIndex + 1, inEnd, postStart + leftCount, postEnd - 1);
 }
 
 findPreorder(0, n - 1, 0, n - 1);
-console.log(tree.slice(1).join(' '));
+console.log(tree.join(' '));
