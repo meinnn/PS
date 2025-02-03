@@ -16,30 +16,50 @@ while (T-- > 0) {
 console.log(result.join('\n'));
 
 function solve(k, arr) {
-  // dp[start][end] == start~end idx 파일 합치는 데 필요한 최소비용
-  const dp = Array.from({ length: k }, () => Array(k).fill(-1));
+  // DP 배열: dp[start][end] => start~end 구간의 최소 비용
+  const dp = Array.from({ length: k }, () => Array(k).fill(Infinity));
 
-  // 누적 합 배열
+  // 누적 합 배열 (prefix sum)
   const sum = Array(k).fill(0);
   sum[0] = arr[0];
   for (let i = 1; i < k; i++) sum[i] = sum[i - 1] + arr[i];
 
-  function re_dp(start, end) {
-    if (start === end) return 0; // 파일 합칠 필요 없음
+  // Knuth 최적화용 분할점 배열
+  const opt = Array.from({ length: k }, () => Array(k).fill(0));
 
-    if (dp[start][end] !== -1) return dp[start][end];
-
-    let ret = Infinity;
-    for (let i = start; i < end; i++) {
-      let left = re_dp(start, i); // 왼쪽 파일 최소
-      let right = re_dp(i + 1, end); // 오른쪽 파일 최소
-      let merge = sum[end] - (start > 0 ? sum[start - 1] : 0); // 왼+오 합치는데 드는 비용
-
-      ret = Math.min(ret, left + right + merge);
-    }
-
-    return (dp[start][end] = ret);
+  // 초기 조건: 한 개의 파일은 합칠 필요 없음
+  for (let i = 0; i < k; i++) {
+    dp[i][i] = 0;
+    opt[i][i] = i;
   }
 
-  return re_dp(0, k - 1);
+  // DP 채우기 (길이 len=2부터 K까지)
+  for (let len = 2; len <= k; len++) {
+    for (let start = 0; start + len - 1 < k; start++) {
+      let end = start + len - 1;
+
+      // 최적화된 탐색 범위 (Knuth Optimization)
+      let optimalStart = opt[start][end - 1];
+      let optimalEnd = opt[start + 1][end];
+
+      dp[start][end] = Infinity;
+      for (
+        let mid = optimalStart;
+        mid <= Math.min(optimalEnd, end - 1);
+        mid++
+      ) {
+        let cost =
+          dp[start][mid] +
+          dp[mid + 1][end] +
+          (sum[end] - (start > 0 ? sum[start - 1] : 0));
+
+        if (dp[start][end] > cost) {
+          dp[start][end] = cost;
+          opt[start][end] = mid;
+        }
+      }
+    }
+  }
+
+  return dp[0][k - 1];
 }
