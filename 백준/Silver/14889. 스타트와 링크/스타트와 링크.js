@@ -25,8 +25,15 @@ function makeTeam(idx, start, link) {
     return;
   }
 
-  if (start.length < N / 2) makeTeam(idx + 1, [...start, idx], link);
-  if (link.length < N / 2) makeTeam(idx + 1, start, [...link, idx]);
+  if (start.length > N / 2 || link.length > N / 2) return;
+
+  start.push(idx);
+  makeTeam(idx + 1, start, link);
+  start.pop();
+
+  link.push(idx);
+  makeTeam(idx + 1, start, link);
+  link.pop();
 }
 
 makeTeam(1, [0], []); // 대칭 제거
