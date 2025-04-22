@@ -6,41 +6,35 @@ const result = [];
 
 for (let t = 0; t < input.length - 1; t++) {
   const [n, ...hist] = input[t].split(' ').map(Number);
-  result.push(divide(hist, 0, n - 1));
+  result.push(getMaxArea(hist));
 }
 
 console.log(result.join('\n'));
 
-function divide(hist, start, end) {
-  if (start === end) return hist[start];
+function getMaxArea(hist) {
+  const stack = [];
+  let maxArea = 0;
+  let idx = 0;
 
-  const mid = Math.floor((start + end) / 2);
-
-  const leftArea = divide(hist, start, mid);
-  const rightArea = divide(hist, mid + 1, end);
-  const midArea = getMidArea(hist, start, end, mid);
-
-  return Math.max(leftArea, rightArea, midArea);
-}
-
-function getMidArea(hist, start, end, mid) {
-  let left = mid;
-  let right = mid + 1;
-  let height = Math.min(hist[left], hist[right]);
-  let maxArea = height * 2;
-
-  // 좌우 확장
-  while (start < left || right < end) {
-    // 왼쪽 확장 가능 && (오른쪽 확장 불가 || 왼쪽이 더 높음)
-    if (start < left && (right === end || hist[left - 1] > hist[right + 1])) {
-      left--;
-      height = Math.min(height, hist[left]);
+  while (idx < hist.length) {
+    // 스택이 비어있거나 현재 높이가 더 크면 push
+    if (stack.length === 0 || hist[idx] > hist[stack[stack.length - 1]]) {
+      stack.push(idx++);
     } else {
-      right++;
-      height = Math.min(height, hist[right]);
+      // 현재 막대가 작으면, pop해서 넓이 계산
+      const height = hist[stack.pop()];
+      // 넓이 = 확장 가능한 왼쪽 경계 ~ (idx-1)
+      const width =
+        stack.length === 0 ? idx : idx - stack[stack.length - 1] - 1;
+      maxArea = Math.max(maxArea, height * width);
     }
+  }
 
-    maxArea = Math.max(maxArea, height * (right - left + 1));
+  // 남은 스택 처리
+  while (stack.length > 0) {
+    const height = hist[stack.pop()];
+    const width = stack.length === 0 ? idx : idx - stack[stack.length - 1] - 1;
+    maxArea = Math.max(maxArea, height * width);
   }
 
   return maxArea;
