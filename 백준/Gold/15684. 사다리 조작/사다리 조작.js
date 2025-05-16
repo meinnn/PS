@@ -36,10 +36,11 @@ function drawLine(cnt, row, col, board) {
   for (let i = row; i <= H; i++) {
     for (let j = i === row ? col : 1; j < N; j++) {
       if (board[i][j] === 0 && board[i][j + 1] === 0) {
-        const copy = board.map((r) => [...r]);
-        copy[i][j] = 1;
-        copy[i][j + 1] = 2;
-        drawLine(cnt + 1, i, j, copy);
+        board[i][j] = 1;
+        board[i][j + 1] = 2;
+        drawLine(cnt + 1, i, j, board);
+        board[i][j] = 0;
+        board[i][j + 1] = 0;
       }
     }
   }
