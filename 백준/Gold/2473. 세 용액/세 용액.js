@@ -6,40 +6,26 @@ const N = +input[0];
 const liquid = input[1].split(' ').map(Number);
 
 liquid.sort((a, b) => a - b);
+
 let result = [];
 let minDiff = Infinity;
 
-for (let i = 0; i < N; i++) {
-  const tmp = [...liquid];
-  tmp.splice(i, 1);
-  const [a, b] = getClosest(-liquid[i], tmp);
-  const total = liquid[i] + a + b;
-
-  if (Math.abs(total) < minDiff) {
-    minDiff = Math.abs(total);
-    result = [liquid[i], a, b];
-  }
-}
-
-console.log(result.sort((a, b) => a - b).join(' '));
-
-function getClosest(target, arr) {
-  let left = 0;
-  let right = arr.length - 1;
-  let diff = Infinity;
-  let ret = [];
+for (let i = 0; i < N - 2; i++) {
+  let left = i + 1;
+  let right = N - 1;
 
   while (left < right) {
-    const sum = arr[left] + arr[right];
-    if (Math.abs(sum - target) < diff) {
-      diff = Math.abs(sum - target);
-      ret = [arr[left], arr[right]];
+    const sum = liquid[i] + liquid[left] + liquid[right];
+
+    if (Math.abs(sum) < minDiff) {
+      minDiff = Math.abs(sum);
+      result = [liquid[i], liquid[left], liquid[right]];
     }
 
-    if (sum === target) return ret;
-    if (sum < target) left++;
+    if (sum < 0) left++;
+    else if (sum === 0) break;
     else right--;
   }
-
-  return ret;
 }
+
+console.log(result.join(' '));
