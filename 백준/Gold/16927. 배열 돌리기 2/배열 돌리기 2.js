@@ -5,49 +5,49 @@ const input = fs.readFileSync(filePath).toString().trim().split('\n');
 let [N, M, R] = input[0].split(' ').map(Number);
 const arr = input.slice(1).map((row) => row.split(' ').map(Number));
 
-const dx = [1, 0, -1, 0]; // 아래, 오, 위, 왼
-const dy = [0, 1, 0, -1];
+const layers = Math.min(N, M) / 2;
 
-const result = Array.from(Array(N), () => Array(M).fill(0));
-let cnt = 0;
+for (let l = 0; l < layers; l++) {
+  const top = l;
+  const left = l;
+  const bottom = N - 1 - l;
+  const right = M - 1 - l;
 
-while (N > 0 && M > 0) {
-  const size = 2 * (N + M - 2);
-  const rotate = R % size;
-  let [cx, cy, cd] = [cnt, cnt, 0];
-  let [nx, ny, nd] = getRotatedPos(cx, cy, cd, rotate);
+  let ring = []; // 테두리 레이어를 1차원으로 추출
 
-  for (let i = 0; i < size; i++) {
-    result[nx][ny] = arr[cx][cy];
-
-    [cx, cy, cd] = getNextPos(cx, cy, cd);
-    [nx, ny, nd] = getNextPos(nx, ny, nd);
+  for (let j = left; j <= right; j++) {
+    ring.push(arr[top][j]);
+  }
+  for (let i = top + 1; i <= bottom - 1; i++) {
+    ring.push(arr[i][right]);
+  }
+  for (let j = right; j >= left; j--) {
+    ring.push(arr[bottom][j]);
+  }
+  for (let i = bottom - 1; i >= top + 1; i--) {
+    ring.push(arr[i][left]);
   }
 
-  N -= 2;
-  M -= 2;
-  cnt++;
-}
+  const r = R % ring.length;
 
-console.log(result.map((row) => row.join(' ')).join('\n'));
-
-function getRotatedPos(cx, cy, dir, rotate) {
-  let [nx, ny, nd] = [cx, cy, dir];
-
-  for (let r = 0; r < rotate; r++) {
-    [nx, ny, nd] = getNextPos(nx, ny, nd);
+  if (r !== 0) {
+    const rotated = ring.slice(r).concat(ring.slice(0, r)); // 반시계
+    ring = rotated;
   }
 
-  return [nx, ny, nd];
-}
-
-function getNextPos(cx, cy, cd) {
-  let [nx, ny, nd] = [cx + dx[cd], cy + dy[cd], cd];
-
-  if (nx < cnt || nx >= N + cnt || ny < cnt || ny >= M + cnt) {
-    nd = (cd + 1) % 4;
-    nx = cx + dx[nd];
-    ny = cy + dy[nd];
+  let idx = 0;
+  for (let j = left; j <= right; j++) {
+    arr[top][j] = ring[idx++];
   }
-  return [nx, ny, nd];
+  for (let i = top + 1; i <= bottom - 1; i++) {
+    arr[i][right] = ring[idx++];
+  }
+  for (let j = right; j >= left; j--) {
+    arr[bottom][j] = ring[idx++];
+  }
+  for (let i = bottom - 1; i >= top + 1; i--) {
+    arr[i][left] = ring[idx++];
+  }
 }
+
+console.log(arr.map((row) => row.join(' ')).join('\n'));
