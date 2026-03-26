@@ -12,22 +12,18 @@ for (let line = 2; line < 2 + m; line++) {
   compliment[i] += w;
 }
 
-const dp = Array(n + 1).fill(-1);
+const tree = Array.from({ length: n + 1 }, () => []);
 
-function re_dp(idx) {
-  if (idx === 1) {
-    return (dp[idx] = 0);
-  }
-
-  if (dp[idx] !== -1) {
-    return dp[idx];
-  }
-
-  return (dp[idx] = compliment[idx] + re_dp(manager[idx - 1]));
+for (let i = 2; i <= n; i++) {
+  tree[manager[i - 1]].push(i);
 }
 
-for (let i = 1; i <= n; i++) {
-  re_dp(i);
+function dfs(idx) {
+  for (const next of tree[idx]) {
+    compliment[next] += compliment[idx];
+    dfs(next);
+  }
 }
 
-console.log(dp.slice(1).join(' '));
+dfs(1);
+console.log(compliment.slice(1).join(' '));
