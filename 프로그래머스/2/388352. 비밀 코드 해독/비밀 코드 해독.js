@@ -1,62 +1,22 @@
 function solution(n, q, ans) {
     const m = q.length;
     
-    let possibleCodes = [];
+    let possibleCodes = combination(Array.from({length: n}, (_, i) => i + 1), 5);
+    const result = [];
     
-    for (let i = 0; i < m; i++) {
-        const combs = combination(q[i], ans[i]);
-        if (i === 0) {
-            for (const comb of combs) {
-                const must = comb;
-                const never = q[i].filter(e => !comb.includes(e));
-                possibleCodes.push([must, never]);
+    outer: for (const code of possibleCodes) {
+        for (let i = 0; i < m; i++) {
+            let correctCount = 0;
+            for (const number of q[i]) {
+                if (code.includes(number)) correctCount++;
             }
-            continue;
+            if (correctCount === ans[i]) continue;
+            else continue outer;
         }
-        
-        const newPossibleCodes = [];
-        for (const [must, never] of possibleCodes) {
-            for (const comb of combs) {
-                const newMust = comb;
-                const newNever = q[i].filter(e => !comb.includes(e));
-                
-                const mustSet = new Set([...must, ...newMust]);
-                const neverSet = new Set([...never, ...newNever]);
-                
-                if (mustSet.size > 5) continue;
-                
-                let isPossible = true;
-                for (let num of mustSet) {
-                    if (neverSet.has(num)) {
-                        isPossible = false;
-                        break;
-                    }
-                }
-                
-                if (isPossible) {
-                    newPossibleCodes.push([Array.from(mustSet).sort((a, b) => a - b), 
-                                           Array.from(neverSet).sort((a, b) => a - b)]);
-                }
-            }
-        }
-        
-        possibleCodes = newPossibleCodes;
+        result.push(code);
     }
     
-    let result = 0;
-    
-    for (const [code, never] of possibleCodes) {
-        if (code.length < 5) {
-            const arr = Array.from({length: n}, (_, i) => i + 1)
-                        .filter(e => !code.includes(e) && !never.includes(e));
-            const more = combination(arr, 5 - code.length);
-            result += more.length;
-        } else if (code.length === 5) {
-            result++;
-        }
-    }
-
-    return result;
+    return result.length;
 }
 
 function combination(arr, count) {
