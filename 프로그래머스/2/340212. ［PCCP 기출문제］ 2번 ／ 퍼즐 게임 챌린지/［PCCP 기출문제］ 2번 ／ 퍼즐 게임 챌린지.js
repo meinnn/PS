@@ -18,7 +18,6 @@ function solution(diffs, times, limit) {
     
     let left = 1;
     let right = 100000;
-    let cnt = 0;
 
     while (left < right) {
         const mid = Math.floor((left + right) / 2);
